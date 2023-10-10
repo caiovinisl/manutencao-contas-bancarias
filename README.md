@@ -40,12 +40,18 @@ Prática de Implementação: Sistema Distribuído Simples para Manutenção de C
 Implementar um sistema rudimentar bancário de transações financeiras, para saque, depósito e transferência de fundos entre contas bancárias. Os processos clientes e o servidor devem manter seus relógios lógicos atualizados (iniciados com valor 0) e exibir em tela cada mudança de valor dos respectivos relógios.
 
 1 - As operações de transações financeiras devem estar implementadas no lado do servidor, mantendo contas de clientes.
+
 2 – Os clientes devem se conectar ao servidor e solicitar as requisições desejadas, ou seja, que tipo de operações financeiras (saldo, retirada e transferência, entre contas). Cada ciente do banco terá uma conta-corrente vinculada a um número de RG e respectivo nome do cliente.
+
+![image](https://github.com/caiovinisl/manutencao-contas-bancarias/assets/31699879/ce4fd071-95f7-4264-b6c6-70e7c3e37c12)
 
 ### Restrições
 1 - O programa pode ser implementado em linguagens para programação desktop em rede, como Python, Java, C, C++ ou C#. Obs.: De preferência em Python.
+
 2 - A comunicação entre os processos deve ser implementada usado sockets.
+
 3 - Todo o programa deve estar devidamente comentado, de modo a facilitar o entendimento do código.
+
 4 Entregar documentação do projeto, contendo: descrição da solução, exemplo de utilização e cópia impressa do código.
 
 ---
