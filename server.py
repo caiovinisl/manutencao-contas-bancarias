@@ -14,8 +14,14 @@ relogio_logico = 0
 def handle_client(client_socket, address):
     global relogio_logico
 
-    while True:
-        try:
+    try:
+        # Simulando autenticação do cliente com RG (número de identidade)
+        rg = client_socket.recv(1024).decode()
+
+        # Inicializando a conta do cliente com saldo zero
+        clientes[rg] = {"rg": rg, "saldo": 1000}
+
+        while True:
             data = client_socket.recv(1024).decode()
             if not data:
                 break
@@ -24,27 +30,39 @@ def handle_client(client_socket, address):
 
             # Processamento das operações bancárias
             if data == "1":
-                resposta = f"Saldo: {clientes[client_socket]['saldo']}. Relógio lógico: {relogio_logico}"
+                resposta = (
+                    f"Saldo: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
+                )
             elif data == "2":
-                # Simulação de uma retirada fixa de 100 para fins de exemplo
-                clientes[client_socket]["saldo"] -= 100
-                resposta = f"Retirada realizada com sucesso. Novo saldo: {clientes[client_socket]['saldo']}. Relógio lógico: {relogio_logico}"
+                amount = int(client_socket.recv(1024).decode())
+                if amount <= clientes[rg]["saldo"]:
+                    clientes[rg]["saldo"] -= amount
+                    resposta = f"Retirada de {amount} realizada com sucesso. Novo saldo: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
+                else:
+                    resposta = f"Saldo insuficiente para realizar a retirada. Saldo atual: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
             elif data == "3":
-                # Simulação de uma transferência fixa de 50 para fins de exemplo
-                clientes[client_socket]["saldo"] += 50
-                resposta = f"Transferência realizada com sucesso. Novo saldo: {clientes[client_socket]['saldo']}. Relógio lógico: {relogio_logico}"
+                amount = int(client_socket.recv(1024).decode())
+                dest_rg = client_socket.recv(1024).decode()
+                if dest_rg in clientes and amount <= clientes[rg]["saldo"]:
+                    clientes[rg]["saldo"] -= amount
+                    clientes[dest_rg]["saldo"] += amount
+                    resposta = f"Transferência de {amount} realizada para RG {dest_rg} com sucesso. Novo saldo: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
+                elif dest_rg not in clientes:
+                    resposta = f"Conta com RG {dest_rg} não existe. Transferência não realizada. Saldo atual: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
+                else:
+                    resposta = f"Saldo insuficiente para realizar a transferência. Saldo atual: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
             else:
                 resposta = "Operação inválida. Relógio lógico: {relogio_logico}"
 
             client_socket.send(resposta.encode())
 
-        except Exception as e:
-            print(f"Erro: {str(e)}")
-            break
-
-    print(f"Conexão encerrada com {address}")
-    del clientes[client_socket]
-    client_socket.close()
+    except Exception as e:
+        print(f"Erro: {str(e)}")
+    finally:
+        if rg in clientes:
+            del clientes[rg]
+        print(f"Conexão encerrada com {address}")
+        client_socket.close()
 
 
 def main():
@@ -57,12 +75,6 @@ def main():
     while True:
         client_socket, address = servidor.accept()
         print(f"Nova conexão de {address}")
-
-        # Simulando autenticação do cliente com RG (número de identidade)
-        rg = client_socket.recv(1024).decode()
-
-        # Inicializando a conta do cliente com saldo zero
-        clientes[client_socket] = {"rg": rg, "saldo": 0}
 
         client_thread = threading.Thread(
             target=handle_client, args=(client_socket, address)
