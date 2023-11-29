@@ -17,11 +17,12 @@ def main():
         print("Menu:")
         print("1. Consultar saldo")
         print("2. Realizar retirada")
-        print("3. Realizar transferência")
-        print("4. Sair")
+        print("3. Realizar deposito")
+        print("4. Realizar transferência")
+        print("5. Sair")
         choice = input("Escolha a operação: ")
 
-        if choice == "4":
+        if choice == "5":
             client_socket.close()
             break
 
@@ -33,11 +34,16 @@ def main():
             amount = input("Digite o valor: ")
             client_socket.send(amount.encode())
 
-        elif choice == "3":
+        if choice == "3":
+            # Solicita o valor a ser retirado
+            amount = input("Digite o valor: ")
+            client_socket.send(amount.encode())
+
+        elif choice == "4":
             # Solicita o valor e o número de RG da conta de destino
             amount = input("Digite o valor: ")
-            dest_rg = input("Digite o número de RG da conta de destino: ")
             client_socket.send(amount.encode())
+            dest_rg = input("Digite o número de RG da conta de destino: ")
             client_socket.send(dest_rg.encode())
 
         # Aguarda a resposta do servidor

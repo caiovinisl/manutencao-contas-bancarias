@@ -18,18 +18,21 @@ def handle_client(client_socket, address):
         # Simulando autenticação do cliente com RG (número de identidade)
         rg = client_socket.recv(1024).decode()
 
-        # Inicializando a conta do cliente com saldo zero
-        clientes[rg] = {"rg": rg, "saldo": 1000}
+        # Inicializando a conta de novos cliente com saldo zero
+        if rg not in clientes:
+            clientes[rg] = {"rg": rg, "saldo": 0}
 
         while True:
             data = client_socket.recv(1024).decode()
             if not data:
                 break
-
+            
+            # Incrementa relogio logico
             relogio_logico += 1
 
             # Processamento das operações bancárias
             if data == "1":
+                # Responde 
                 resposta = (
                     f"Saldo: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
                 )
@@ -40,9 +43,17 @@ def handle_client(client_socket, address):
                     resposta = f"Retirada de {amount} realizada com sucesso. Novo saldo: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
                 else:
                     resposta = f"Saldo insuficiente para realizar a retirada. Saldo atual: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
+
             elif data == "3":
                 amount = int(client_socket.recv(1024).decode())
+                clientes[rg]["saldo"] += amount
+                resposta = f"Deposito de {amount} realizada com sucesso. Novo saldo: {clientes[rg]['saldo']}. Relógio lógico: {relogio_logico}"
+                
+            elif data == "4":
+                amount = int(client_socket.recv(1024).decode())
+                print(amount)
                 dest_rg = client_socket.recv(1024).decode()
+                print(dest_rg)
                 if dest_rg in clientes and amount <= clientes[rg]["saldo"]:
                     clientes[rg]["saldo"] -= amount
                     clientes[dest_rg]["saldo"] += amount
@@ -59,8 +70,6 @@ def handle_client(client_socket, address):
     except Exception as e:
         print(f"Erro: {str(e)}")
     finally:
-        if rg in clientes:
-            del clientes[rg]
         print(f"Conexão encerrada com {address}")
         client_socket.close()
 
